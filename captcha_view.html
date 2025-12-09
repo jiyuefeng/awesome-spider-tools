@@ -1,0 +1,1192 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>图片坐标测量工具（尺子模式）</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      padding: 20px;
+      background: #f8f9fa;
+      margin: 0;
+    }
+
+    h1 {
+      margin: 0 0 10px 0;
+      font-size: 24px;
+      color: #212529;
+    }
+
+    .header-info {
+      margin-bottom: 20px;
+      font-size: 13px;
+      color: #6c757d;
+      line-height: 1.6;
+    }
+
+    .main-container {
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+      min-height: calc(100vh - 120px);
+    }
+
+    /* 左侧区域 - 图片展示 */
+    .left-panel {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    /* 右侧区域 - 工具面板 */
+    .right-panel {
+      flex: 1;
+      display: flex;
+      gap: 20px;
+      max-height: calc(100vh - 120px);
+      overflow-y: auto;
+    }
+
+    /* 右侧面板列 */
+    .right-column {
+      flex: 1;
+      min-width: 280px;
+      max-width: 380px;
+    }
+
+    /* 主容器 - 包含尺子和图片 */
+    .ruler-container {
+      position: relative;
+      display: inline-block;
+      background: white;
+      padding: 30px 0 0 30px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    /* 顶部横向尺子 */
+    .ruler-top {
+      position: absolute;
+      top: 0;
+      left: 30px;
+      height: 30px;
+      background: #e9ecef;
+      border-bottom: 2px solid #495057;
+      display: flex;
+      font-size: 10px;
+      color: #495057;
+    }
+
+    /* 左侧纵向尺子 */
+    .ruler-left {
+      position: absolute;
+      left: 0;
+      top: 30px;
+      width: 30px;
+      background: #e9ecef;
+      border-right: 2px solid #495057;
+      font-size: 10px;
+      color: #495057;
+    }
+
+    /* 左上角的方块 */
+    .ruler-corner {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 30px;
+      height: 30px;
+      background: #dee2e6;
+      border-right: 2px solid #495057;
+      border-bottom: 2px solid #495057;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: bold;
+      color: #495057;
+    }
+
+    /* 尺子刻度线 */
+    .ruler-mark {
+      position: absolute;
+      background: #495057;
+    }
+
+    .ruler-mark.major {
+      background: #212529;
+    }
+
+    /* 尺子数字 */
+    .ruler-number {
+      position: absolute;
+      font-size: 9px;
+      color: #495057;
+      user-select: none;
+    }
+
+    /* 图片容器 */
+    .img-wrapper {
+      position: relative;
+      display: inline-block;
+    }
+
+    .img-wrapper img {
+      display: block;
+      max-width: 600px;
+      height: auto;
+      cursor: crosshair;
+    }
+
+    /* 十字线 - 实时跟随鼠标 */
+    .crosshair-vertical,
+    .crosshair-horizontal {
+      position: absolute;
+      background: rgba(255, 0, 0, 0.5);
+      pointer-events: none;
+      display: none;
+    }
+
+    .crosshair-vertical {
+      width: 1px;
+      height: 100%;
+      top: 0;
+    }
+
+    .crosshair-horizontal {
+      width: 100%;
+      height: 1px;
+      left: 0;
+    }
+
+    /* 实时坐标显示框 */
+    .coord-tooltip {
+      position: absolute;
+      background: rgba(0, 0, 0, 0.85);
+      color: white;
+      padding: 6px 10px;
+      border-radius: 4px;
+      font-size: 11px;
+      pointer-events: none;
+      display: none;
+      white-space: nowrap;
+      z-index: 100;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+
+    /* 点击标记小圆点 */
+    .marker {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #ff4444;
+      border: 2px solid white;
+      box-shadow: 0 0 4px rgba(0,0,0,0.5);
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      display: none;
+    }
+
+    /* 信息面板 */
+    .info {
+      min-width: 300px;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .info h3 {
+      margin-top: 0;
+      color: #212529;
+      border-bottom: 2px solid #007bff;
+      padding-bottom: 10px;
+    }
+
+    .info-item {
+      margin-bottom: 15px;
+      padding: 10px;
+      background: #f8f9fa;
+      border-radius: 4px;
+    }
+
+    .info-label {
+      font-size: 12px;
+      color: #6c757d;
+      margin-bottom: 5px;
+      font-weight: 500;
+    }
+
+    .info-value {
+      font-size: 11px;
+      color: #495057;
+      margin-top: 3px;
+    }
+
+    code {
+      background: #fff;
+      padding: 4px 8px;
+      border-radius: 3px;
+      border: 1px solid #dee2e6;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      color: #007bff;
+      font-weight: bold;
+      display: inline-block;
+    }
+
+    .current-coord {
+      background: #e7f3ff;
+      border-left: 3px solid #007bff;
+    }
+
+    .clicked-coord {
+      background: #ffe7e7;
+      border-left: 3px solid #ff4444;
+    }
+
+    .original-coord {
+      background: #e8f5e9;
+      border-left: 3px solid #28a745;
+    }
+
+    .size-info {
+      background: #fff3cd;
+      border-left: 3px solid #ffc107;
+    }
+
+    /* 裁剪区域矩形框 */
+    .crop-area-rect {
+      position: absolute;
+      border: 2px dashed #ff9800;
+      background: rgba(255, 152, 0, 0.1);
+      pointer-events: none;
+      display: none;
+    }
+
+    /* 打码平台返回的标记点 */
+    .captcha-point {
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #00ff00;
+      border: 3px solid #fff;
+      box-shadow: 0 0 10px rgba(0, 255, 0, 0.8), 0 0 20px rgba(0, 255, 0, 0.5);
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      animation: blink 1s ease-in-out infinite;
+      z-index: 50;
+    }
+
+    /* 点的序号标签 */
+    .captcha-point-label {
+      position: absolute;
+      top: -25px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #00ff00;
+      color: #000;
+      font-weight: bold;
+      font-size: 12px;
+      padding: 2px 6px;
+      border-radius: 3px;
+      white-space: nowrap;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+
+    /* 闪烁动画 */
+    @keyframes blink {
+      0%, 100% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+      }
+      50% {
+        opacity: 0.3;
+        transform: translate(-50%, -50%) scale(1.2);
+      }
+    }
+
+    /* 验证工具面板 */
+    .verification-panel {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .verification-panel h3 {
+      margin-top: 0;
+      color: #212529;
+      border-bottom: 2px solid #28a745;
+      padding-bottom: 10px;
+    }
+
+    .input-group {
+      margin-bottom: 15px;
+    }
+
+    .input-group label {
+      display: block;
+      font-size: 13px;
+      color: #495057;
+      margin-bottom: 5px;
+      font-weight: 500;
+    }
+
+    .input-group input {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid #ced4da;
+      border-radius: 4px;
+      font-size: 13px;
+      font-family: 'Courier New', monospace;
+      box-sizing: border-box;
+    }
+
+    .input-group input:focus {
+      outline: none;
+      border-color: #28a745;
+      box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1);
+    }
+
+    .input-group .hint {
+      font-size: 11px;
+      color: #6c757d;
+      margin-top: 3px;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .btn-primary {
+      background: #28a745;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #218838;
+    }
+
+    .btn-secondary {
+      background: #6c757d;
+      color: white;
+    }
+
+    .btn-secondary:hover {
+      background: #5a6268;
+    }
+
+    .verification-result {
+      margin-top: 15px;
+      padding: 10px;
+      border-radius: 4px;
+      font-size: 13px;
+      display: none;
+    }
+
+    .verification-result.success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .verification-result.info {
+      background: #d1ecf1;
+      color: #0c5460;
+      border: 1px solid #bee5eb;
+    }
+
+    /* 图片加载面板 */
+    .image-loader-panel {
+      background: white;
+      padding: 15px 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+
+    .image-loader-panel h3 {
+      margin: 0 0 15px 0;
+      color: #212529;
+      font-size: 16px;
+      border-bottom: 2px solid #17a2b8;
+      padding-bottom: 8px;
+    }
+
+    .loader-controls {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .loader-controls input[type="text"] {
+      flex: 1;
+      min-width: 300px;
+      padding: 8px 12px;
+      border: 1px solid #ced4da;
+      border-radius: 4px;
+      font-size: 13px;
+      font-family: 'Courier New', monospace;
+    }
+
+    .loader-controls input[type="text"]:focus {
+      outline: none;
+      border-color: #17a2b8;
+      box-shadow: 0 0 0 3px rgba(23, 162, 184, 0.1);
+    }
+
+    .loader-controls input[type="file"] {
+      display: none;
+    }
+
+    .btn-info {
+      background: #17a2b8;
+      color: white;
+    }
+
+    .btn-info:hover {
+      background: #138496;
+    }
+
+    .btn-file-label {
+      padding: 10px 20px;
+      background: #6c757d;
+      color: white;
+      border-radius: 4px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: inline-block;
+    }
+
+    .btn-file-label:hover {
+      background: #5a6268;
+    }
+
+    .loader-hint {
+      font-size: 11px;
+      color: #6c757d;
+      width: 100%;
+      margin-top: 5px;
+    }
+
+    .image-info {
+      margin-top: 10px;
+      padding: 8px 12px;
+      background: #e7f3ff;
+      border-left: 3px solid #17a2b8;
+      border-radius: 4px;
+      font-size: 12px;
+      color: #0c5460;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>📐 图片坐标测量工具（尺子模式）</h1>
+  <div class="header-info">
+    <strong>使用说明：</strong>
+    移动鼠标实时显示坐标和十字线 • 点击图片标记坐标点 • 坐标系从图片左上角 (0, 0) 开始
+  </div>
+
+  <!-- 图片加载面板 -->
+  <div class="image-loader-panel">
+    <h3>🖼️ 图片加载</h3>
+    <div class="loader-controls">
+      <input 
+        type="text" 
+        id="imageUrlInput" 
+        placeholder="输入图片URL或本地路径，例如: https://example.com/image.png 或 ./screen.png"
+        value="./screen.png"
+      />
+      <button class="btn btn-info" onclick="loadImageFromUrl()">
+        📥 加载图片
+      </button>
+      <label for="imageFileInput" class="btn-file-label">
+        📁 选择本地文件
+      </label>
+      <input 
+        type="file" 
+        id="imageFileInput" 
+        accept="image/*"
+        onchange="loadImageFromFile(this)"
+      />
+    </div>
+    <div class="loader-hint">
+      支持 JPG、PNG、GIF、WebP 等常见图片格式 • 网络图片需要支持跨域访问
+    </div>
+    <div class="image-info" id="imageInfo"></div>
+  </div>
+
+  <div class="main-container">
+    <!-- 左侧：图片展示区域 -->
+    <div class="left-panel">
+      <!-- 尺子容器 -->
+      <div class="ruler-container" id="rulerContainer">
+      <!-- 左上角方块 -->
+      <div class="ruler-corner">0</div>
+      
+      <!-- 顶部横向尺子 -->
+      <div class="ruler-top" id="rulerTop"></div>
+      
+      <!-- 左侧纵向尺子 -->
+      <div class="ruler-left" id="rulerLeft"></div>
+      
+      <!-- 图片容器 -->
+      <div class="img-wrapper" id="imgWrapper">
+        <!-- 替换为你的验证码图片地址 -->
+        <img id="targetImg" src="./screen.png" alt="demo" />
+        
+        <!-- 十字线 -->
+        <div class="crosshair-vertical" id="crosshairV"></div>
+        <div class="crosshair-horizontal" id="crosshairH"></div>
+        
+        <!-- 实时坐标提示框 -->
+        <div class="coord-tooltip" id="coordTooltip">X: 0, Y: 0</div>
+        
+        <!-- 点击标记 -->
+        <div class="marker" id="marker"></div>
+      </div>
+    </div>
+    </div>
+
+    <!-- 右侧：工具面板 -->
+    <div class="right-panel">
+      <!-- 左列：验证工具面板 -->
+      <div class="right-column">
+        <div class="verification-panel">
+          <h3>🎯 打码平台坐标验证</h3>
+          
+          <div class="input-group">
+            <label for="cropAreaInput">裁剪区域 (left, upper, right, lower)</label>
+            <input 
+              type="text" 
+              id="cropAreaInput" 
+              placeholder="90, 550, 810, 1140"
+              value="90, 550, 810, 1140"
+            />
+            <div class="hint">格式：左, 上, 右, 下（逗号分隔）</div>
+          </div>
+
+          <div class="input-group">
+            <label for="captchaPointsInput">打码平台返回坐标</label>
+            <input 
+              type="text" 
+              id="captchaPointsInput" 
+              placeholder="497,259|597,374|244,327"
+              value=""
+            />
+            <div class="hint">格式：x,y|x,y|x,y（用 | 分隔）</div>
+          </div>
+
+          <div class="btn-group">
+            <button class="btn btn-primary" onclick="showCaptchaPoints()">
+              ✨ 显示标记
+            </button>
+            <button class="btn btn-secondary" onclick="clearCaptchaPoints()">
+              🗑️ 清除
+            </button>
+          </div>
+
+          <div class="verification-result" id="verificationResult"></div>
+        </div>
+      </div>
+
+      <!-- 右列：坐标信息面板 -->
+      <div class="right-column">
+        <div class="info">
+          <h3>📊 坐标信息</h3>
+      
+      <div class="info-item size-info">
+        <div class="info-label">📏 图片原始尺寸</div>
+        <code id="originalSize">加载中...</code>
+        <div class="info-value">图片文件的真实尺寸</div>
+      </div>
+      
+      <div class="info-item">
+        <div class="info-label">🖥️ 图片渲染尺寸</div>
+        <code id="displaySize">加载中...</code>
+        <div class="info-value">浏览器中的显示尺寸</div>
+      </div>
+      
+      <div class="info-item">
+        <div class="info-label">📐 缩放比例</div>
+        <code id="scaleRatio">-</code>
+        <div class="info-value">原始尺寸 ÷ 渲染尺寸</div>
+      </div>
+      
+      <div class="info-item current-coord">
+        <div class="info-label">🖱️ 当前鼠标坐标（渲染尺寸）</div>
+        <code id="browserCoord">移动鼠标查看</code>
+      </div>
+      
+      <div class="info-item original-coord">
+        <div class="info-label">✨ 当前鼠标坐标（原始尺寸）</div>
+        <code id="originalCoord">移动鼠标查看</code>
+        <div class="info-value">按原始尺寸计算的坐标</div>
+      </div>
+      
+      <div class="info-item clicked-coord">
+        <div class="info-label">📍 最后点击坐标（渲染尺寸）</div>
+        <code id="clickedCoord">点击图片查看</code>
+      </div>
+      
+      <div class="info-item original-coord">
+        <div class="info-label">📍 最后点击坐标（原始尺寸）</div>
+        <code id="clickedOriginalCoord">点击图片查看</code>
+        <div class="info-value">按原始尺寸计算的坐标</div>
+      </div>
+      
+      <div class="info-item">
+        <div class="info-label">📱 映射到手机坐标系（900 × 1600）</div>
+        <code id="phoneCoord">点击图片查看</code>
+        <div class="info-value">基于原始尺寸映射</div>
+      </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 目标手机坐标系分辨率
+    const PHONE_WIDTH = 900;
+    const PHONE_HEIGHT = 1600;
+
+    // 获取DOM元素
+    const img = document.getElementById("targetImg");
+    const wrapper = document.getElementById("imgWrapper");
+    const marker = document.getElementById("marker");
+    const crosshairV = document.getElementById("crosshairV");
+    const crosshairH = document.getElementById("crosshairH");
+    const coordTooltip = document.getElementById("coordTooltip");
+    const rulerTop = document.getElementById("rulerTop");
+    const rulerLeft = document.getElementById("rulerLeft");
+
+    const originalSizeEl = document.getElementById("originalSize");
+    const displaySizeEl = document.getElementById("displaySize");
+    const scaleRatioEl = document.getElementById("scaleRatio");
+    const browserCoordEl = document.getElementById("browserCoord");
+    const originalCoordEl = document.getElementById("originalCoord");
+    const clickedCoordEl = document.getElementById("clickedCoord");
+    const clickedOriginalCoordEl = document.getElementById("clickedOriginalCoord");
+    const phoneCoordEl = document.getElementById("phoneCoord");
+
+    // 绘制尺子刻度（基于原始尺寸）
+    function drawRulers() {
+      const rect = img.getBoundingClientRect();
+      const displayWidth = Math.round(rect.width);
+      const displayHeight = Math.round(rect.height);
+      
+      // 获取图片原始尺寸
+      const originalWidth = img.naturalWidth;
+      const originalHeight = img.naturalHeight;
+      
+      // 计算缩放比例
+      const scaleX = originalWidth / displayWidth;
+      const scaleY = originalHeight / displayHeight;
+
+      // 清空尺子
+      rulerTop.innerHTML = '';
+      rulerLeft.innerHTML = '';
+
+      // 设置尺子尺寸（按渲染尺寸）
+      rulerTop.style.width = displayWidth + 'px';
+      rulerLeft.style.height = displayHeight + 'px';
+
+      // 计算刻度间隔（基于原始尺寸）
+      // 根据原始宽度选择合适的刻度间隔
+      let originalStepX = 50;
+      if (originalWidth > 2000) {
+        originalStepX = 200;
+      } else if (originalWidth > 1000) {
+        originalStepX = 100;
+      }
+      
+      let originalStepY = 50;
+      if (originalHeight > 2000) {
+        originalStepY = 200;
+      } else if (originalHeight > 1000) {
+        originalStepY = 100;
+      }
+
+      // 绘制顶部横向尺子（显示原始尺寸刻度）
+      const displayStepX = originalStepX / scaleX; // 转换为显示尺寸上的间隔
+      for (let i = 0; i <= displayWidth; i += displayStepX) {
+        const originalValue = Math.round(i * scaleX); // 对应的原始尺寸值
+        const isMajor = originalValue % (originalStepX * 2) === 0;
+        
+        // 刻度线
+        const mark = document.createElement('div');
+        mark.className = 'ruler-mark' + (isMajor ? ' major' : '');
+        mark.style.left = i + 'px';
+        mark.style.top = isMajor ? '0' : '5px';
+        mark.style.width = '1px';
+        mark.style.height = isMajor ? '30px' : '10px';
+        rulerTop.appendChild(mark);
+        
+        // 刻度数字（显示原始尺寸值）
+        if (isMajor && originalValue > 0) {
+          const num = document.createElement('div');
+          num.className = 'ruler-number';
+          num.textContent = originalValue;
+          num.style.left = (i + 2) + 'px';
+          num.style.top = '2px';
+          rulerTop.appendChild(num);
+        }
+      }
+
+      // 绘制左侧纵向尺子（显示原始尺寸刻度）
+      const displayStepY = originalStepY / scaleY;
+      for (let i = 0; i <= displayHeight; i += displayStepY) {
+        const originalValue = Math.round(i * scaleY);
+        const isMajor = originalValue % (originalStepY * 2) === 0;
+        
+        // 刻度线
+        const mark = document.createElement('div');
+        mark.className = 'ruler-mark' + (isMajor ? ' major' : '');
+        mark.style.top = i + 'px';
+        mark.style.left = isMajor ? '0' : '20px';
+        mark.style.height = '1px';
+        mark.style.width = isMajor ? '30px' : '10px';
+        rulerLeft.appendChild(mark);
+        
+        // 刻度数字（显示原始尺寸值）
+        if (isMajor && originalValue > 0) {
+          const num = document.createElement('div');
+          num.className = 'ruler-number';
+          num.textContent = originalValue;
+          num.style.top = (i + 2) + 'px';
+          num.style.left = '2px';
+          num.style.transform = 'rotate(-90deg)';
+          num.style.transformOrigin = 'left top';
+          rulerLeft.appendChild(num);
+        }
+      }
+    }
+
+    // 更新尺寸信息
+    function updateSizeInfo() {
+      const rect = img.getBoundingClientRect();
+      const displayWidth = Math.round(rect.width);
+      const displayHeight = Math.round(rect.height);
+      const originalWidth = img.naturalWidth;
+      const originalHeight = img.naturalHeight;
+      
+      // 更新显示
+      originalSizeEl.textContent = `${originalWidth} × ${originalHeight} px`;
+      displaySizeEl.textContent = `${displayWidth} × ${displayHeight} px`;
+      
+      const scaleX = (originalWidth / displayWidth).toFixed(2);
+      const scaleY = (originalHeight / displayHeight).toFixed(2);
+      scaleRatioEl.textContent = `${scaleX} × ${scaleY}`;
+    }
+
+    // 图片加载完后，显示尺寸并绘制尺子
+    img.addEventListener("load", () => {
+      updateSizeInfo();
+      drawRulers();
+    });
+
+    // 如果图片已经加载完成（缓存）
+    if (img.complete) {
+      updateSizeInfo();
+      drawRulers();
+    }
+
+    // 鼠标移动 - 显示实时坐标和十字线
+    wrapper.addEventListener("mousemove", (event) => {
+      const rect = img.getBoundingClientRect();
+      const wrapperRect = wrapper.getBoundingClientRect();
+      
+      // 计算相对图片的坐标（渲染尺寸）
+      const x = event.clientX - rect.left;
+      const y = event.clientY - rect.top;
+
+      // 检查是否在图片范围内
+      if (x >= 0 && y >= 0 && x <= rect.width && y <= rect.height) {
+        // 显示十字线
+        crosshairV.style.display = 'block';
+        crosshairH.style.display = 'block';
+        coordTooltip.style.display = 'block';
+
+        // 更新十字线位置（相对wrapper）
+        const offsetX = event.clientX - wrapperRect.left;
+        const offsetY = event.clientY - wrapperRect.top;
+        
+        crosshairV.style.left = offsetX + 'px';
+        crosshairH.style.top = offsetY + 'px';
+
+        // 计算原始尺寸坐标
+        const scaleX = img.naturalWidth / rect.width;
+        const scaleY = img.naturalHeight / rect.height;
+        const xOriginal = x * scaleX;
+        const yOriginal = y * scaleY;
+
+        // 更新坐标提示框（显示原始尺寸坐标）
+        coordTooltip.textContent = `原始: ${Math.round(xOriginal)}, ${Math.round(yOriginal)}`;
+        coordTooltip.style.left = (offsetX + 15) + 'px';
+        coordTooltip.style.top = (offsetY + 15) + 'px';
+
+        // 如果太靠右或靠下，调整提示框位置
+        if (offsetX > rect.width - 120) {
+          coordTooltip.style.left = (offsetX - 125) + 'px';
+        }
+        if (offsetY > rect.height - 40) {
+          coordTooltip.style.top = (offsetY - 35) + 'px';
+        }
+
+        // 更新实时坐标显示
+        browserCoordEl.textContent = `X: ${Math.round(x)}, Y: ${Math.round(y)}`;
+        originalCoordEl.textContent = `X: ${Math.round(xOriginal)}, Y: ${Math.round(yOriginal)}`;
+      } else {
+        // 鼠标移出图片区域，隐藏十字线
+        crosshairV.style.display = 'none';
+        crosshairH.style.display = 'none';
+        coordTooltip.style.display = 'none';
+      }
+    });
+
+    // 鼠标离开 - 隐藏十字线
+    wrapper.addEventListener("mouseleave", () => {
+      crosshairV.style.display = 'none';
+      crosshairH.style.display = 'none';
+      coordTooltip.style.display = 'none';
+      browserCoordEl.textContent = '移动鼠标查看';
+      originalCoordEl.textContent = '移动鼠标查看';
+    });
+
+    // 点击事件 - 标记坐标点
+    wrapper.addEventListener("click", (event) => {
+      const rect = img.getBoundingClientRect();
+      const wrapperRect = wrapper.getBoundingClientRect();
+
+      // ① 计算渲染坐标（相对图片左上角，基于显示尺寸）
+      const xBrowser = event.clientX - rect.left;
+      const yBrowser = event.clientY - rect.top;
+
+      // 防止点击到边框空白区域
+      if (xBrowser < 0 || yBrowser < 0 || xBrowser > rect.width || yBrowser > rect.height) {
+        return;
+      }
+
+      // ② 计算原始尺寸坐标
+      const scaleToOriginal = img.naturalWidth / rect.width;
+      const scaleToOriginalY = img.naturalHeight / rect.height;
+      const xOriginal = xBrowser * scaleToOriginal;
+      const yOriginal = yBrowser * scaleToOriginalY;
+
+      // ③ 按原始尺寸比例映射到手机坐标系（900 × 1600）
+      const scaleToPhone = PHONE_WIDTH / img.naturalWidth;
+      const scaleToPhoneY = PHONE_HEIGHT / img.naturalHeight;
+      const xPhone = xOriginal * scaleToPhone;
+      const yPhone = yOriginal * scaleToPhoneY;
+
+      // 显示各种坐标
+      clickedCoordEl.textContent = `X: ${Math.round(xBrowser)}, Y: ${Math.round(yBrowser)}`;
+      clickedOriginalCoordEl.textContent = `X: ${Math.round(xOriginal)}, Y: ${Math.round(yOriginal)}`;
+      phoneCoordEl.textContent = `X: ${Math.round(xPhone)}, Y: ${Math.round(yPhone)}`;
+
+      // 移动小红点到点击位置
+      const offsetX = event.clientX - wrapperRect.left;
+      const offsetY = event.clientY - wrapperRect.top;
+
+      marker.style.left = offsetX + "px";
+      marker.style.top = offsetY + "px";
+      marker.style.display = "block";
+
+      console.log('点击坐标:', {
+        渲染尺寸: { x: Math.round(xBrowser), y: Math.round(yBrowser) },
+        原始尺寸: { x: Math.round(xOriginal), y: Math.round(yOriginal) },
+        手机坐标: { x: Math.round(xPhone), y: Math.round(yPhone) }
+      });
+    });
+
+    // 窗口大小改变时重新绘制尺子
+    window.addEventListener('resize', () => {
+      drawRulers();
+    });
+
+    // ==================== 打码平台坐标验证功能 ====================
+
+    // 显示打码平台返回的坐标点
+    function showCaptchaPoints() {
+      // 清除之前的标记
+      clearCaptchaPoints();
+
+      // 获取输入值
+      const cropAreaInput = document.getElementById('cropAreaInput').value.trim();
+      const captchaPointsInput = document.getElementById('captchaPointsInput').value.trim();
+      const resultEl = document.getElementById('verificationResult');
+
+      // 验证输入
+      if (!cropAreaInput || !captchaPointsInput) {
+        showResult('请填写裁剪区域和打码平台坐标！', 'error');
+        return;
+      }
+
+      try {
+        // 解析裁剪区域 (left, upper, right, lower)
+        const cropValues = cropAreaInput.split(',').map(v => parseInt(v.trim()));
+        if (cropValues.length !== 4 || cropValues.some(isNaN)) {
+          throw new Error('裁剪区域格式错误！应为 4 个数字，用逗号分隔');
+        }
+        const [left, upper, right, lower] = cropValues;
+        const cropWidth = right - left;
+        const cropHeight = lower - upper;
+
+        // 解析打码平台坐标 (x,y|x,y|x,y)
+        const pointStrings = captchaPointsInput.split('|').map(s => s.trim()).filter(s => s);
+        if (pointStrings.length === 0) {
+          throw new Error('请输入至少一个坐标点！');
+        }
+
+        const points = [];
+        for (const pointStr of pointStrings) {
+          const coords = pointStr.split(',').map(v => parseInt(v.trim()));
+          if (coords.length !== 2 || coords.some(isNaN)) {
+            throw new Error(`坐标格式错误: ${pointStr}`);
+          }
+          points.push({ x: coords[0], y: coords[1] });
+        }
+
+        // 在图片上显示裁剪区域
+        const rect = img.getBoundingClientRect();
+        const scaleX = rect.width / img.naturalWidth;
+        const scaleY = rect.height / img.naturalHeight;
+
+        // 绘制裁剪区域矩形
+        const cropRect = document.createElement('div');
+        cropRect.className = 'crop-area-rect';
+        cropRect.style.left = (left * scaleX) + 'px';
+        cropRect.style.top = (upper * scaleY) + 'px';
+        cropRect.style.width = (cropWidth * scaleX) + 'px';
+        cropRect.style.height = (cropHeight * scaleY) + 'px';
+        cropRect.style.display = 'block';
+        wrapper.appendChild(cropRect);
+
+        // 显示每个打码平台返回的点
+        const pointsInfo = [];
+        points.forEach((point, index) => {
+          // 打码平台坐标是相对于裁剪后的图片
+          // 转换为原始图片坐标：原始坐标 = 裁剪起点 + 打码坐标
+          const originalX = left + point.x;
+          const originalY = upper + point.y;
+
+          // 转换为渲染坐标
+          const displayX = originalX * scaleX;
+          const displayY = originalY * scaleY;
+
+          // 创建标记点
+          const pointEl = document.createElement('div');
+          pointEl.className = 'captcha-point';
+          pointEl.style.left = displayX + 'px';
+          pointEl.style.top = displayY + 'px';
+          pointEl.style.display = 'block';
+
+          // 添加序号标签
+          const label = document.createElement('div');
+          label.className = 'captcha-point-label';
+          label.textContent = `#${index + 1} (${point.x},${point.y})`;
+          pointEl.appendChild(label);
+
+          wrapper.appendChild(pointEl);
+
+          pointsInfo.push({
+            index: index + 1,
+            captcha: `(${point.x}, ${point.y})`,
+            original: `(${originalX}, ${originalY})`
+          });
+
+          console.log(`点 #${index + 1}:`, {
+            打码平台坐标: `(${point.x}, ${point.y})`,
+            相对裁剪区域: `相对于 (${left}, ${upper})`,
+            原始图片坐标: `(${originalX}, ${originalY})`,
+            渲染坐标: `(${Math.round(displayX)}, ${Math.round(displayY)})`
+          });
+        });
+
+        // 显示成功信息
+        let resultText = `✅ 已标记 ${points.length} 个点<br>`;
+        resultText += `📦 裁剪区域: (${left}, ${upper}) → (${right}, ${lower})<br>`;
+        resultText += `📏 裁剪尺寸: ${cropWidth} × ${cropHeight}<br><br>`;
+        pointsInfo.forEach(p => {
+          resultText += `#${p.index} 打码: ${p.captcha} → 原始: ${p.original}<br>`;
+        });
+        showResult(resultText, 'success');
+
+      } catch (error) {
+        showResult('❌ ' + error.message, 'error');
+        console.error('解析错误:', error);
+      }
+    }
+
+    // 清除打码平台标记
+    function clearCaptchaPoints() {
+      // 移除所有打码点标记
+      const points = wrapper.querySelectorAll('.captcha-point');
+      points.forEach(p => p.remove());
+
+      // 移除裁剪区域矩形
+      const cropRects = wrapper.querySelectorAll('.crop-area-rect');
+      cropRects.forEach(r => r.remove());
+
+      // 清除结果提示
+      const resultEl = document.getElementById('verificationResult');
+      resultEl.style.display = 'none';
+    }
+
+    // 显示结果信息
+    function showResult(message, type) {
+      const resultEl = document.getElementById('verificationResult');
+      resultEl.innerHTML = message;
+      resultEl.className = 'verification-result ' + (type === 'error' ? 'info' : 'success');
+      resultEl.style.display = 'block';
+    }
+
+    // ==================== 图片加载功能 ====================
+
+    // 从URL加载图片
+    function loadImageFromUrl() {
+      const imageUrl = document.getElementById('imageUrlInput').value.trim();
+      const imageInfoEl = document.getElementById('imageInfo');
+      
+      if (!imageUrl) {
+        showImageInfo('❌ 请输入图片URL或路径！', 'error');
+        return;
+      }
+
+      // 显示加载中
+      showImageInfo('⏳ 正在加载图片...', 'loading');
+      
+      // 清除之前的标记
+      clearCaptchaPoints();
+      marker.style.display = 'none';
+      
+      // 重置坐标显示
+      resetCoordinates();
+      
+      // 创建新图片对象测试加载
+      const testImg = new Image();
+      
+      testImg.onload = function() {
+        // 加载成功，更新主图片
+        img.src = imageUrl;
+        showImageInfo(`✅ 图片加载成功！尺寸: ${testImg.naturalWidth} × ${testImg.naturalHeight} px`, 'success');
+        console.log('图片加载成功:', imageUrl);
+      };
+      
+      testImg.onerror = function() {
+        showImageInfo('❌ 图片加载失败！请检查URL是否正确，或图片是否支持跨域访问。', 'error');
+        console.error('图片加载失败:', imageUrl);
+      };
+      
+      testImg.src = imageUrl;
+    }
+
+    // 从本地文件加载图片
+    function loadImageFromFile(input) {
+      const imageInfoEl = document.getElementById('imageInfo');
+      
+      if (!input.files || !input.files[0]) {
+        return;
+      }
+      
+      const file = input.files[0];
+      
+      // 验证文件类型
+      if (!file.type.startsWith('image/')) {
+        showImageInfo('❌ 请选择图片文件！', 'error');
+        return;
+      }
+      
+      showImageInfo('⏳ 正在加载本地图片...', 'loading');
+      
+      // 清除之前的标记
+      clearCaptchaPoints();
+      marker.style.display = 'none';
+      
+      // 重置坐标显示
+      resetCoordinates();
+      
+      // 使用FileReader读取文件
+      const reader = new FileReader();
+      
+      reader.onload = function(e) {
+        // 更新图片源
+        img.src = e.target.result;
+        
+        // 更新输入框显示文件名
+        document.getElementById('imageUrlInput').value = file.name;
+        
+        showImageInfo(`✅ 本地图片加载成功！文件名: ${file.name}`, 'success');
+        console.log('本地图片加载成功:', file.name);
+      };
+      
+      reader.onerror = function() {
+        showImageInfo('❌ 文件读取失败！', 'error');
+        console.error('文件读取失败');
+      };
+      
+      reader.readAsDataURL(file);
+    }
+
+    // 显示图片加载信息
+    function showImageInfo(message, type) {
+      const imageInfoEl = document.getElementById('imageInfo');
+      imageInfoEl.textContent = message;
+      imageInfoEl.style.display = 'block';
+      
+      // 根据类型设置样式
+      if (type === 'error') {
+        imageInfoEl.style.background = '#f8d7da';
+        imageInfoEl.style.borderLeftColor = '#dc3545';
+        imageInfoEl.style.color = '#721c24';
+      } else if (type === 'loading') {
+        imageInfoEl.style.background = '#fff3cd';
+        imageInfoEl.style.borderLeftColor = '#ffc107';
+        imageInfoEl.style.color = '#856404';
+      } else {
+        imageInfoEl.style.background = '#d4edda';
+        imageInfoEl.style.borderLeftColor = '#28a745';
+        imageInfoEl.style.color = '#155724';
+      }
+    }
+
+    // 重置坐标显示
+    function resetCoordinates() {
+      originalSizeEl.textContent = '加载中...';
+      displaySizeEl.textContent = '加载中...';
+      scaleRatioEl.textContent = '-';
+      browserCoordEl.textContent = '移动鼠标查看';
+      originalCoordEl.textContent = '移动鼠标查看';
+      clickedCoordEl.textContent = '点击图片查看';
+      clickedOriginalCoordEl.textContent = '点击图片查看';
+      phoneCoordEl.textContent = '点击图片查看';
+    }
+
+    // 支持在输入框按回车加载图片
+    document.getElementById('imageUrlInput').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        loadImageFromUrl();
+      }
+    });
+  </script>
+</body>
+</html>
