@@ -12,24 +12,31 @@
         }
         
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            background: linear-gradient(135deg, #2b2b2b 0%, #1e1e1e 50%, #1e1e1e 100%);
             min-height: 100vh;
             padding: 20px;
+            background-attachment: fixed;
         }
         
         .container {
             max-width: 900px;
             margin: 0 auto;
-            background: white;
+            background: rgba(40, 40, 40, 0.6);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             border-radius: 15px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
             overflow: hidden;
+            border: 1px solid rgba(128, 128, 128, 0.3);
         }
         
         .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: rgba(51, 51, 51, 0.8);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(128, 128, 128, 0.4);
+            color: #e0e0e0;
             padding: 30px;
             text-align: center;
         }
@@ -37,11 +44,13 @@
         .header h1 {
             font-size: 28px;
             margin-bottom: 10px;
+            color: #e0e0e0;
         }
         
         .header p {
             font-size: 14px;
             opacity: 0.9;
+            color: #b0b0b0;
         }
         
         .content {
@@ -58,14 +67,16 @@
         .control-group {
             flex: 1;
             min-width: 250px;
-            background: #f8f9fa;
+            background: rgba(43, 43, 43, 0.8);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
             padding: 20px;
             border-radius: 10px;
-            border: 2px solid #e9ecef;
+            border: 1px solid rgba(128, 128, 128, 0.4);
         }
         
         .control-group h3 {
-            color: #495057;
+            color: #e0e0e0;
             margin-bottom: 15px;
             font-size: 16px;
         }
@@ -86,7 +97,7 @@
         .checkbox-group label {
             font-size: 14px;
             cursor: pointer;
-            color: #495057;
+            color: #e0e0e0;
         }
         
         .options {
@@ -96,17 +107,18 @@
         }
         
         .option {
-            background: white;
+            background: rgba(51, 51, 51, 0.9);
             padding: 10px 15px;
             border-radius: 8px;
-            border: 2px solid #dee2e6;
+            border: 1px solid rgba(128, 128, 128, 0.4);
             cursor: pointer;
             transition: all 0.3s;
             font-size: 14px;
+            color: #e0e0e0;
         }
         
         .option:hover {
-            border-color: #667eea;
+            border-color: rgba(128, 128, 128, 0.8);
             box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
         }
         
@@ -123,7 +135,7 @@
         .url-input label {
             display: block;
             font-size: 14px;
-            color: #495057;
+            color: #e0e0e0;
             margin-bottom: 8px;
             font-weight: 600;
         }
@@ -132,17 +144,19 @@
             width: 100%;
             height: 120px;
             padding: 15px;
-            border: 2px solid #dee2e6;
+            border: 1px solid rgba(128, 128, 128, 0.4);
             border-radius: 10px;
             font-size: 14px;
             font-family: 'Courier New', monospace;
             resize: vertical;
             transition: border-color 0.3s;
+            background: rgba(51, 51, 51, 0.9);
+            color: #e0e0e0;
         }
         
         .url-input textarea:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: rgba(128, 128, 128, 0.8);
         }
         
         .buttons {
@@ -184,14 +198,16 @@
         }
         
         .result {
-            background: #f8f9fa;
-            border: 2px solid #e9ecef;
+            background: rgba(43, 43, 43, 0.8);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            border: 1px solid rgba(128, 128, 128, 0.4);
             border-radius: 10px;
             padding: 20px;
         }
         
         .result h3 {
-            color: #495057;
+            color: #e0e0e0;
             margin-bottom: 15px;
             font-size: 16px;
         }
@@ -200,47 +216,51 @@
             width: 100%;
             height: 150px;
             padding: 15px;
-            border: 2px solid #dee2e6;
+            border: 1px solid rgba(128, 128, 128, 0.4);
             border-radius: 10px;
             font-size: 14px;
             font-family: 'Courier New', monospace;
             resize: vertical;
-            background: white;
+            background: rgba(51, 51, 51, 0.9);
+            color: #e0e0e0;
         }
         
         .examples {
             margin-top: 30px;
             padding-top: 30px;
-            border-top: 2px solid #e9ecef;
+            border-top: 1px solid rgba(128, 128, 128, 0.4);
         }
         
         .examples h3 {
-            color: #495057;
+            color: #e0e0e0;
             margin-bottom: 15px;
             font-size: 16px;
         }
         
         .example-item {
-            background: white;
-            border: 2px solid #dee2e6;
+            background: rgba(43, 43, 43, 0.8);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            border: 1px solid rgba(128, 128, 128, 0.4);
             border-radius: 10px;
             padding: 15px;
             margin-bottom: 15px;
         }
         
         .example-item h4 {
-            color: #495057;
+            color: #e0e0e0;
             margin-bottom: 10px;
             font-size: 14px;
         }
         
         .example-url {
             font-family: 'Courier New', monospace;
-            background: #f8f9fa;
+            background: rgba(51, 51, 51, 0.9);
             padding: 10px;
             border-radius: 5px;
-            border: 1px solid #dee2e6;
+            border: 1px solid rgba(128, 128, 128, 0.4);
             margin-bottom: 10px;
+            color: #e0e0e0;
         }
         
         .copy-btn {

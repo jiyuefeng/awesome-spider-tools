@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spider Tools 工具集合</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            background: linear-gradient(135deg, #2b2b2b 0%, #1e1e1e 50%, #1e1e1e 100%);
+            min-height: 100vh;
+            padding: 20px;
+            background-attachment: fixed;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: rgba(40, 40, 40, 0.6);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 8px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+            border: 1px solid rgba(128, 128, 128, 0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: rgba(51, 51, 51, 0.8);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(128, 128, 128, 0.4);
+            color: #e0e0e0;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+            color: #e0e0e0;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+            color: #b0b0b0;
+        }
+        
+        .tools-list {
+            padding: 30px;
+        }
+        
+        .tool-item {
+            background: rgba(43, 43, 43, 0.8);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            border: 1px solid rgba(128, 128, 128, 0.4);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+        }
+        
+        .tool-item:hover {
+            transform: translateY(-2px);
+            background: rgba(51, 51, 51, 0.9);
+            border-color: rgba(128, 128, 128, 0.6);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+        }
+        
+        .tool-title {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+        
+        .tool-icon {
+            font-size: 28px;
+        }
+        
+        .tool-name {
+            font-size: 20px;
+            font-weight: 600;
+            color: #e0e0e0;
+        }
+        
+        .tool-desc {
+            color: #b0b0b0;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        .footer {
+            background: rgba(51, 51, 51, 0.8);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            padding: 20px 30px;
+            border-top: 1px solid rgba(128, 128, 128, 0.4);
+            color: #b0b0b0;
+            font-size: 14px;
+            text-align: center;
+        }
+        
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🕷️ Spider Tools 工具集合</h1>
+            <p>专为爬虫开发者打造的实用工具箱</p>
+        </div>
+        
+        <div class="tools-list">
+            <!-- URL编码/解码工具 -->
+            <a href="url.html" class="tool-item" target="_blank">
+                <div class="tool-title">
+                    <div class="tool-icon">🌐</div>
+                    <div class="tool-name">URL编码/解码工具</div>
+                </div>
+                <div class="tool-desc">快速对URL进行编码和解码操作，支持完整URL或仅查询参数处理</div>
+            </a>
+            
+            <!-- 图片坐标测量工具 -->
+            <a href="captcha_view.html" class="tool-item" target="_blank">
+                <div class="tool-title">
+                    <div class="tool-icon">🖼️</div>
+                    <div class="tool-name">图片坐标测量工具</div>
+                </div>
+                <div class="tool-desc">提供精确的坐标测量功能，支持尺子模式和多种坐标系</div>
+            </a>
+            
+            <!-- jsoup在线解析工具 -->
+            <a href="https://try.jsoup.org/" class="tool-item" target="_blank" rel="noopener noreferrer">
+                <div class="tool-title">
+                    <div class="tool-icon">🔍</div>
+                    <div class="tool-name">jsoup在线解析工具</div>
+                </div>
+                <div class="tool-desc">在线测试和学习jsoup HTML解析库，快速验证CSS选择器和DOM操作</div>
+            </a>
+            
+            <!-- curl to OkHttp转换工具 -->
+            <a href="https://curlconverter.com/java-okhttp/" class="tool-item" target="_blank" rel="noopener noreferrer">
+                <div class="tool-title">
+                    <div class="tool-icon">🔄</div>
+                    <div class="tool-name">curl转OkHttp工具</div>
+                </div>
+                <div class="tool-desc">将curl命令转换为Java OkHttp代码，快速生成网络请求代码</div>
+            </a>
+        </div>
+        
+        <div class="footer">
+            <div style="margin-top: 15px;">
+                © 2024 Spider Tools - 专为爬虫开发者打造的实用工具箱
+            </div>
+        </div>
+    </div>
+</body>
+</html>
