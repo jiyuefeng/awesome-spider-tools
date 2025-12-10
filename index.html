@@ -56,6 +56,9 @@
         
         .tools-list {
             padding: 30px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
         }
         
         .tool-item {
@@ -63,14 +66,70 @@
             backdrop-filter: blur(5px);
             -webkit-backdrop-filter: blur(5px);
             border: 1px solid rgba(128, 128, 128, 0.4);
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
+            border-radius: 12px;
+            padding: 0;
             transition: all 0.3s;
             text-decoration: none;
             color: inherit;
             display: block;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+            min-height: 160px;
+            position: relative;
+            overflow: hidden;
+            perspective: 1000px;
+        }
+        
+        .tool-card {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+        
+        .tool-item:hover .tool-card {
+            transform: rotateY(180deg);
+        }
+        
+        .tool-front, .tool-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+            padding: 25px;
+        }
+        
+        .tool-front {
+            background: rgba(43, 43, 43, 0.8);
+        }
+        
+        .tool-back {
+            background: rgba(51, 51, 51, 0.9);
+            transform: rotateY(180deg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: #e0e0e0;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        .tool-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transform: scaleX(0);
+            transition: transform 0.3s;
+        }
+        
+        .tool-item:hover::before {
+            transform: scaleX(1);
         }
         
         .tool-item:hover {
@@ -126,38 +185,110 @@
         <div class="tools-list">
             <!-- URL编码/解码工具 -->
             <a href="url.html" class="tool-item" target="_blank">
-                <div class="tool-title">
-                    <div class="tool-icon">🌐</div>
-                    <div class="tool-name">URL编码/解码工具</div>
+                <div class="tool-card">
+                    <!-- 正面 -->
+                    <div class="tool-front">
+                        <div class="tool-title">
+                            <div class="tool-icon">🌐</div>
+                            <div class="tool-name">URL编码/解码工具</div>
+                        </div>
+                        <div class="tool-desc">快速对URL进行编码和解码操作，支持完整URL或仅查询参数处理</div>
+                    </div>
+                    <!-- 背面 -->
+                    <div class="tool-back">
+                        支持完整的URL编码/解码功能，可以处理整个URL或仅处理查询参数部分，满足各种爬虫开发需求
+                    </div>
                 </div>
-                <div class="tool-desc">快速对URL进行编码和解码操作，支持完整URL或仅查询参数处理</div>
             </a>
             
             <!-- 图片坐标测量工具 -->
             <a href="captcha_view.html" class="tool-item" target="_blank">
-                <div class="tool-title">
-                    <div class="tool-icon">🖼️</div>
-                    <div class="tool-name">图片坐标测量工具</div>
+                <div class="tool-card">
+                    <!-- 正面 -->
+                    <div class="tool-front">
+                        <div class="tool-title">
+                            <div class="tool-icon">🖼️</div>
+                            <div class="tool-name">图片坐标测量工具</div>
+                        </div>
+                        <div class="tool-desc">提供精确的坐标测量功能，支持尺子模式和多种坐标系</div>
+                    </div>
+                    <!-- 背面 -->
+                    <div class="tool-back">
+                        支持多种测量模式，包括普通模式、尺子模式和双尺子模式，提供精确的坐标定位和测量功能，适用于各种图像分析需求
+                    </div>
                 </div>
-                <div class="tool-desc">提供精确的坐标测量功能，支持尺子模式和多种坐标系</div>
             </a>
             
             <!-- jsoup在线解析工具 -->
             <a href="https://try.jsoup.org/" class="tool-item" target="_blank" rel="noopener noreferrer">
-                <div class="tool-title">
-                    <div class="tool-icon">🔍</div>
-                    <div class="tool-name">jsoup在线解析工具</div>
+                <div class="tool-card">
+                    <!-- 正面 -->
+                    <div class="tool-front">
+                        <div class="tool-title">
+                            <div class="tool-icon">🔍</div>
+                            <div class="tool-name">jsoup在线解析工具</div>
+                        </div>
+                        <div class="tool-desc">在线测试和学习jsoup HTML解析库，快速验证CSS选择器和DOM操作</div>
+                    </div>
+                    <!-- 背面 -->
+                    <div class="tool-back">
+                        提供在线的jsoup解析环境，支持实时测试CSS选择器语法，快速验证HTML解析逻辑，是学习和调试jsoup的绝佳工具
+                    </div>
                 </div>
-                <div class="tool-desc">在线测试和学习jsoup HTML解析库，快速验证CSS选择器和DOM操作</div>
             </a>
             
             <!-- curl to OkHttp转换工具 -->
             <a href="https://curlconverter.com/java-okhttp/" class="tool-item" target="_blank" rel="noopener noreferrer">
-                <div class="tool-title">
-                    <div class="tool-icon">🔄</div>
-                    <div class="tool-name">curl转OkHttp工具</div>
+                <div class="tool-card">
+                    <!-- 正面 -->
+                    <div class="tool-front">
+                        <div class="tool-title">
+                            <div class="tool-icon">🔄</div>
+                            <div class="tool-name">curl转OkHttp工具</div>
+                        </div>
+                        <div class="tool-desc">将curl命令转换为Java OkHttp代码，快速生成网络请求代码</div>
+                    </div>
+                    <!-- 背面 -->
+                    <div class="tool-back">
+                        支持将复杂的curl命令自动转换为Java OkHttp代码，包括请求头、请求体、Cookie等，大幅提升开发效率
+                    </div>
                 </div>
-                <div class="tool-desc">将curl命令转换为Java OkHttp代码，快速生成网络请求代码</div>
+            </a>
+            
+            <!-- box3.cn -->
+            <a href="https://box3.cn/" class="tool-item" target="_blank" rel="noopener noreferrer">
+                <div class="tool-card">
+                    <!-- 正面 -->
+                    <div class="tool-front">
+                        <div class="tool-title">
+                            <div class="tool-icon">📦</div>
+                            <div class="tool-name">box3.cn</div>
+                        </div>
+                        <div class="tool-desc">提供多种在线工具和资源，助力开发效率提升</div>
+                    </div>
+                    <!-- 背面 -->
+                    <div class="tool-back">
+                        汇集了丰富的在线工具和开发资源，包括代码格式化、数据转换、API测试等多种实用工具，提升开发效率
+                    </div>
+                </div>
+            </a>
+            
+            <!-- SpiderBox -->
+            <a href="https://spiderbox.cn/" class="tool-item" target="_blank" rel="noopener noreferrer">
+                <div class="tool-card">
+                    <!-- 正面 -->
+                    <div class="tool-front">
+                        <div class="tool-title">
+                            <div class="tool-icon">🕷️</div>
+                            <div class="tool-name">SpiderBox</div>
+                        </div>
+                        <div class="tool-desc">专业的爬虫工具箱，提供全面的爬虫开发解决方案</div>
+                    </div>
+                    <!-- 背面 -->
+                    <div class="tool-back">
+                        专注于爬虫开发的综合性工具平台，提供从数据采集、处理到分析的全流程工具支持，助力爬虫项目高效开发
+                    </div>
+                </div>
             </a>
         </div>
         
