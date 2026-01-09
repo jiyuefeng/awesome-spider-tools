@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图标生成器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .preview-section {
+            margin-bottom: 30px;
+        }
+
+        .preview-grid {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            align-items: flex-end;
+            margin: 30px 0;
+        }
+
+        .preview-item {
+            text-align: center;
+        }
+
+        .preview-item canvas {
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            display: block;
+            margin: 0 auto 10px;
+            background: white;
+        }
+
+        .preview-item label {
+            font-size: 12px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .controls {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+        }
+
+        .control-group {
+            margin-bottom: 20px;
+        }
+
+        .control-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .control-group input[type="text"],
+        .control-group input[type="color"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .color-inputs {
+            display: flex;
+            gap: 15px;
+        }
+
+        .color-inputs > div {
+            flex: 1;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        button {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #666;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .instructions {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 25px;
+            font-size: 13px;
+            color: #856404;
+        }
+
+        .instructions h3 {
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .instructions ol {
+            margin-left: 20px;
+        }
+
+        .instructions li {
+            margin-bottom: 5px;
+        }
+
+        .success-message {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 12px;
+            border-radius: 6px;
+            margin-top: 15px;
+            text-align: center;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨  图标生成器</h1>
+        <p class="subtitle">自定义并生成Chrome扩展所需的图标</p>
+
+        <div class="preview-section">
+            <h3 style="margin-bottom: 20px; color: #333;">预览</h3>
+            <div class="preview-grid">
+                <div class="preview-item">
+                    <canvas id="icon16" width="16" height="16"></canvas>
+                    <label>16 × 16</label>
+                </div>
+                <div class="preview-item">
+                    <canvas id="icon48" width="48" height="48"></canvas>
+                    <label>48 × 48</label>
+                </div>
+                <div class="preview-item">
+                    <canvas id="icon128" width="128" height="128"></canvas>
+                    <label>128 × 128</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="control-group">
+                <label>图标文字 <span style="color: #999; font-size: 12px;">(1-4个字符)</span></label>
+                <input type="text" id="iconText" value="网" maxlength="4" placeholder="输入1-4个字符">
+            </div>
+            
+            <div class="control-group">
+                <label>渐变颜色</label>
+                <div class="color-inputs">
+                    <div>
+                        <label style="font-size: 12px; color: #666;">起始色</label>
+                        <input type="color" id="color1" value="#667eea">
+                    </div>
+                    <div>
+                        <label style="font-size: 12px; color: #666;">结束色</label>
+                        <input type="color" id="color2" value="#764ba2">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="button-group">
+            <button class="btn-secondary" onclick="resetToDefault()">重置为默认</button>
+            <button class="btn-primary" onclick="downloadAllIcons()">📥 下载所有图标</button>
+        </div>
+
+        <div class="success-message" id="successMessage">
+            ✅ 图标已成功下载！请将它们放入 icons/ 文件夹中
+        </div>
+
+        <div class="instructions">
+            <h3>📋 使用说明</h3>
+            <ol>
+                <li>输入1-4个字符作为图标文字，调整颜色（或保持默认）</li>
+                <li>点击"下载所有图标"按钮</li>
+                <li>将下载的 icon16.png、icon48.png、icon128.png 放入扩展的 <code>icons/</code> 文件夹</li>
+                <li>重新加载Chrome扩展即可看到新图标</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        // 绘制图标
+        function drawIcon(canvas, size) {
+            const ctx = canvas.getContext('2d');
+            const text = document.getElementById('iconText').value || '网';
+            const color1 = document.getElementById('color1').value;
+            const color2 = document.getElementById('color2').value;
+            const charCount = text.length;
+
+            // 清除画布
+            ctx.clearRect(0, 0, size, size);
+
+            // 绘制渐变背景
+            const gradient = ctx.createLinearGradient(0, 0, size, size);
+            gradient.addColorStop(0, color1);
+            gradient.addColorStop(1, color2);
+            
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, size, size);
+
+            // 绘制圆角效果
+            if (size >= 48) {
+                const radius = size * 0.15;
+                ctx.clearRect(0, 0, size, size);
+                ctx.beginPath();
+                ctx.moveTo(radius, 0);
+                ctx.lineTo(size - radius, 0);
+                ctx.arcTo(size, 0, size, radius, radius);
+                ctx.lineTo(size, size - radius);
+                ctx.arcTo(size, size, size - radius, size, radius);
+                ctx.lineTo(radius, size);
+                ctx.arcTo(0, size, 0, size - radius, radius);
+                ctx.lineTo(0, radius);
+                ctx.arcTo(0, 0, radius, 0, radius);
+                ctx.closePath();
+                ctx.fillStyle = gradient;
+                ctx.fill();
+            }
+
+            // 根据字符数量智能调整字体大小和布局
+            ctx.fillStyle = 'white';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            if (charCount === 1) {
+                // 单个字符 - 居中显示，较大字体
+                ctx.font = `bold ${size * 0.65}px Arial, "Microsoft YaHei", sans-serif`;
+                ctx.fillText(text, size / 2, size / 2);
+            } else if (charCount === 2) {
+                // 两个字符 - 横向排列，更紧凑
+                const fontSize = size * 0.45;
+                ctx.font = `bold ${fontSize}px Arial, "Microsoft YaHei", sans-serif`;
+                
+                // 横向排列 - 减小间距使更紧凑
+                const spacing = size * 0.20;
+                ctx.fillText(text[0], size / 2 - spacing, size / 2);
+                ctx.fillText(text[1], size / 2 + spacing, size / 2);
+            } else if (charCount === 3) {
+                // 三个字符 - 倒品字形排列（上2下1），更紧凑
+                const fontSize = size * 0.35;
+                ctx.font = `bold ${fontSize}px Arial, "Microsoft YaHei", sans-serif`;
+                
+                const topY = size * 0.35;
+                const bottomY = size * 0.7;
+                const spacing = size * 0.18;
+                
+                // 上面2个
+                ctx.fillText(text[0], size / 2 - spacing, topY);
+                ctx.fillText(text[1], size / 2 + spacing, topY);
+                // 下面1个
+                ctx.fillText(text[2], size / 2, bottomY);
+            } else if (charCount === 4) {
+                // 四个字符 - 2x2排列，更紧凑
+                const fontSize = size * 0.32;
+                ctx.font = `bold ${fontSize}px Arial, "Microsoft YaHei", sans-serif`;
+                
+                const spacing = size * 0.18;
+                const topY = size / 2 - spacing;
+                const bottomY = size / 2 + spacing;
+                const leftX = size / 2 - spacing;
+                const rightX = size / 2 + spacing;
+                
+                // 第一行
+                ctx.fillText(text[0], leftX, topY);
+                ctx.fillText(text[1], rightX, topY);
+                // 第二行
+                ctx.fillText(text[2], leftX, bottomY);
+                ctx.fillText(text[3], rightX, bottomY);
+            }
+
+            // 添加微妙的边框
+            if (size >= 48) {
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+                ctx.lineWidth = size >= 128 ? 2 : 1;
+                
+                const radius = size * 0.15;
+                ctx.beginPath();
+                ctx.moveTo(radius, 0);
+                ctx.lineTo(size - radius, 0);
+                ctx.arcTo(size, 0, size, radius, radius);
+                ctx.lineTo(size, size - radius);
+                ctx.arcTo(size, size, size - radius, size, radius);
+                ctx.lineTo(radius, size);
+                ctx.arcTo(0, size, 0, size - radius, radius);
+                ctx.lineTo(0, radius);
+                ctx.arcTo(0, 0, radius, 0, radius);
+                ctx.closePath();
+                ctx.stroke();
+            }
+        }
+
+        // 更新所有预览
+        function updatePreviews() {
+            drawIcon(document.getElementById('icon16'), 16);
+            drawIcon(document.getElementById('icon48'), 48);
+            drawIcon(document.getElementById('icon128'), 128);
+        }
+
+        // 下载单个图标
+        function downloadIcon(canvas, filename) {
+            canvas.toBlob(function(blob) {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            });
+        }
+
+        // 下载所有图标
+        function downloadAllIcons() {
+            // 创建临时画布用于高质量导出
+            const sizes = [
+                { size: 16, name: 'icon16.png' },
+                { size: 48, name: 'icon48.png' },
+                { size: 128, name: 'icon128.png' }
+            ];
+
+            sizes.forEach((item, index) => {
+                setTimeout(() => {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = item.size;
+                    canvas.height = item.size;
+                    drawIcon(canvas, item.size);
+                    downloadIcon(canvas, item.name);
+
+                    // 最后一个下载完成后显示成功消息
+                    if (index === sizes.length - 1) {
+                        const msg = document.getElementById('successMessage');
+                        msg.style.display = 'block';
+                        setTimeout(() => {
+                            msg.style.display = 'none';
+                        }, 5000);
+                    }
+                }, index * 300); // 延迟下载，避免浏览器阻止
+            });
+        }
+
+        // 重置为默认
+        function resetToDefault() {
+            document.getElementById('iconText').value = '网';
+            document.getElementById('color1').value = '#667eea';
+            document.getElementById('color2').value = '#764ba2';
+            updatePreviews();
+        }
+
+        // 监听输入变化
+        document.getElementById('iconText').addEventListener('input', updatePreviews);
+        document.getElementById('color1').addEventListener('input', updatePreviews);
+        document.getElementById('color2').addEventListener('input', updatePreviews);
+
+        // 初始化
+        updatePreviews();
+    </script>
+</body>
+</html>
